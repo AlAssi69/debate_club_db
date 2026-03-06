@@ -12,13 +12,6 @@ use Illuminate\View\View;
 
 class PersonController extends Controller
 {
-    public function index(): View
-    {
-        return view('persons.index', [
-            'persons' => Person::with('roles')->latest()->paginate(15),
-        ]);
-    }
-
     public function create(): View
     {
         return view('persons.create', [

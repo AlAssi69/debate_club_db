@@ -6,6 +6,7 @@ use App\Contracts\Syncable;
 use App\Enums\AttendanceStatus;
 use App\Enums\SessionRole;
 use App\Traits\HasGoogleSheetSync;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -49,6 +50,30 @@ class TrainingSession extends Model implements Syncable
     {
         return $this->participants()
             ->wherePivot('role', SessionRole::Trainee->value);
+    }
+
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($term) {
+            $q->where('id', $term)
+                ->orWhere('title', 'like', "%{$term}%")
+                ->orWhere('category', 'like', "%{$term}%");
+        });
+    }
+
+    public function scopeFilter(Builder $query, array $filters): Builder
+    {
+        return $query
+            ->when($filters['category'] ?? null, fn (Builder $q, string $category) => $q->where('category', 'like', "%{$category}%")
+            )
+            ->when($filters['date_from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('scheduled_date', '>=', $date)
+            )
+            ->when($filters['date_to'] ?? null, fn (Builder $q, string $date) => $q->whereDate('scheduled_date', '<=', $date)
+            );
     }
 
     public function getSheetName(): string

@@ -13,15 +13,6 @@ use Illuminate\View\View;
 
 class TrainingSessionController extends Controller
 {
-    public function index(): View
-    {
-        return view('training-sessions.index', [
-            'sessions' => TrainingSession::with(['trainers', 'trainees'])
-                ->latest('scheduled_date')
-                ->paginate(15),
-        ]);
-    }
-
     public function create(): View
     {
         return view('training-sessions.create', [

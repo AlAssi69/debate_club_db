@@ -48,6 +48,11 @@ new class extends Component
                 </div>
             </div>
 
+            <!-- Global Search -->
+            <div class="hidden sm:flex sm:items-center sm:ms-6 sm:w-64">
+                <livewire:global-search />
+            </div>
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">

@@ -12,15 +12,6 @@ use Illuminate\View\View;
 
 class DebateController extends Controller
 {
-    public function index(): View
-    {
-        return view('debates.index', [
-            'debates' => Debate::with('participants')
-                ->latest('date')
-                ->paginate(15),
-        ]);
-    }
-
     public function create(): View
     {
         return view('debates.create', [

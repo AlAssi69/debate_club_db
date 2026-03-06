@@ -7,6 +7,7 @@ use App\Enums\AttendanceStatus;
 use App\Enums\DebateParticipantRole;
 use App\Enums\SessionRole;
 use App\Traits\HasGoogleSheetSync;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -69,6 +70,31 @@ class Person extends Model implements Syncable
         return $this->belongsToMany(Debate::class, 'debate_person')
             ->withPivot(['role'])
             ->withTimestamps();
+    }
+
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        if (blank($term)) {
+            return $query;
+        }
+
+        return $query->where(function (Builder $q) use ($term) {
+            $q->where('id', $term)
+                ->orWhere('first_name', 'like', "%{$term}%")
+                ->orWhere('last_name', 'like', "%{$term}%")
+                ->orWhere('contact_info', 'like', "%{$term}%");
+        });
+    }
+
+    public function scopeFilter(Builder $query, array $filters): Builder
+    {
+        return $query
+            ->when($filters['role'] ?? null, fn (Builder $q, string $role) => $q->whereHas('roles', fn (Builder $r) => $r->where('name', $role))
+            )
+            ->when($filters['join_date_from'] ?? null, fn (Builder $q, string $date) => $q->whereDate('join_date', '>=', $date)
+            )
+            ->when($filters['join_date_to'] ?? null, fn (Builder $q, string $date) => $q->whereDate('join_date', '<=', $date)
+            );
     }
 
     public function hasRole(string $roleName): bool
