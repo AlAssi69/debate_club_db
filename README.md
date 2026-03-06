@@ -1,59 +1,239 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Debate Club Management System
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A local web application for managing debate club members, training sessions, attendance, and competition records. Features bi-directional synchronization with Google Sheets to maintain data parity between local storage and cloud records.
 
-## About Laravel
+## Table of Contents
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- [Overview](#overview)
+- [Architecture](#architecture)
+- [Technology Stack](#technology-stack)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Running the Application](#running-the-application)
+- [Usage Guide](#usage-guide)
+- [Google Sheets Synchronization](#google-sheets-synchronization)
+- [Project Structure](#project-structure)
+- [License](#license)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Overview
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+The system tracks the full lifecycle of a debate club: registering members with flexible role assignments, scheduling training sessions, recording attendance, and logging debate competitions with participant roles. A single person can hold multiple roles simultaneously (e.g., Admin + Trainer), and every entity can be synchronized to Google Sheets for cloud-based access and backup.
 
-## Learning Laravel
+### Core Features
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+- **Person & Role Management** -- Central registry with dynamic, overlapping roles (Admin, Trainer, Member, Beneficiary).
+- **Training Session Management** -- Schedule sessions with assigned trainers and trainees, categorized by topic.
+- **Attendance Tracking** -- Bulk present/absent marking per session for all participants.
+- **Debate & Competition Tracking** -- Log friendly, internal, and international debates with per-event participant roles (Debater, Judge, Moderator).
+- **Google Sheets Bi-Directional Sync** -- Push local changes to Google Sheets on save; pull cloud updates into the local database on demand, with timestamp-based conflict resolution.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Architecture
 
-## Laravel Sponsors
+```
+┌─────────────────────────────────────────────────────────┐
+│                     Blade + Livewire UI                 │
+│          (Tailwind CSS, Alpine.js, Breeze Auth)         │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│                    Laravel HTTP Layer                    │
+│    Controllers ─► Form Requests ─► Policies (AuthZ)     │
+└────────────────────────┬────────────────────────────────┘
+                         │
+┌────────────────────────▼────────────────────────────────┐
+│                   Eloquent ORM Layer                     │
+│  Models ─► Enums ─► Traits ─► Observers ─► Contracts    │
+└──────────┬─────────────────────────────┬────────────────┘
+           │                             │
+┌──────────▼──────────┐   ┌──────────────▼───────────────┐
+│   SQLite Database    │   │   Google Sheets Sync Layer   │
+│  (local, zero-cfg)   │   │  SyncPushService (on save)   │
+│                      │   │  SyncPullService (on demand)  │
+│  - persons           │   │  ConflictResolver (timestamps)│
+│  - roles             │   │  Queue Jobs (async)           │
+│  - training_sessions │   │  GoogleSheetsClient (API v4)  │
+│  - debates           │   └──────────────────────────────┘
+│  - pivot tables      │
+└──────────────────────┘
+```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+### Design Principles
 
-### Premium Partners
+- **SOLID** -- Syncable contract (Interface Segregation), service classes (Single Responsibility), dependency injection via Service Provider (Dependency Inversion).
+- **DRY** -- Shared `HasGoogleSheetSync` trait across all syncable models; backed enums for type-safe constants; reusable form request classes.
+- **Data Integrity** -- All destructive and multi-step operations wrapped in `DB::transaction()`. Cascading deletes on pivot tables. `Model::preventLazyLoading()` enforced in development.
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Technology Stack
 
-## Contributing
+| Layer | Technology | Version |
+|---|---|---|
+| Framework | Laravel | 12.x |
+| Language | PHP | 8.2+ |
+| Frontend | Livewire + Blade | 3.x |
+| CSS | Tailwind CSS | 4.x |
+| JS Interactivity | Alpine.js | 3.x |
+| Authentication | Laravel Breeze | 2.x |
+| Database | SQLite | -- |
+| Queue Driver | Database | -- |
+| Cloud Sync | Google Sheets API | v4 |
+| API Client | google/apiclient | 2.x |
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Prerequisites
 
-## Code of Conduct
+- **PHP 8.2+** with extensions: `sqlite3`, `pdo_sqlite`, `mbstring`, `openssl`, `curl`
+- **Composer** (2.x)
+- **Node.js** (18+) and **npm**
+- (Optional) A Google Cloud project with the Sheets API enabled and a Service Account key file for synchronization
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+## Installation
 
-## Security Vulnerabilities
+```bash
+# 1. Clone the repository
+git clone <repository-url>
+cd "Debate's Club DB"
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 2. Install PHP dependencies
+composer install
+
+# 3. Install frontend dependencies
+npm install
+
+# 4. Configure environment
+cp .env.example .env
+php artisan key:generate
+
+# 5. Create the SQLite database and run migrations
+touch database/database.sqlite   # Linux/macOS
+# On Windows: New-Item database\database.sqlite -ItemType File
+php artisan migrate
+
+# 6. Seed the predefined roles
+php artisan db:seed
+
+# 7. Build frontend assets
+npm run build
+```
+
+## Running the Application
+
+### Quick Start (all services)
+
+```bash
+composer dev
+```
+
+This starts the web server, queue worker, log watcher, and Vite dev server concurrently.
+
+### Manual Start
+
+```bash
+# Terminal 1 -- Web server
+php artisan serve
+
+# Terminal 2 -- Queue worker (required for async Google Sheets sync)
+php artisan queue:work
+
+# Terminal 3 -- Vite dev server (for hot-reload during development)
+npm run dev
+```
+
+The application will be available at **http://localhost:8000**.
+
+## Usage Guide
+
+### 1. Register & Log In
+
+Navigate to `http://localhost:8000/register` to create your account. After registration you are redirected to the dashboard.
+
+### 2. Dashboard
+
+The dashboard displays summary statistics (total persons, training sessions, debates) along with upcoming sessions and recent debates.
+
+### 3. Managing Persons
+
+Navigate to **Persons** in the top navigation.
+
+- **Add Person** -- Fill in first name, last name, contact info, join date, and assign one or more roles via checkboxes.
+- **Edit / Delete** -- Use the action links in the persons table.
+- **View Details** -- Click a person's name to see their roles, training sessions, and debate participation history.
+
+### 4. Training Sessions
+
+Navigate to **Training Sessions**.
+
+- **Create Session** -- Set title, category, date, time, and duration. Assign trainers and trainees from the persons list.
+- **Take Attendance** -- From a session's detail page, click "Take Attendance" to bulk-mark each participant as Present or Absent.
+
+### 5. Debates
+
+Navigate to **Debates**.
+
+- **Create Debate** -- Set title, type (Friendly / International / Internal), date, location, and outcome. Add participants with their event-specific role (Debater, Judge, Moderator) using the dynamic form rows.
+- **View Details** -- See all participants grouped by their role in the debate.
+
+### 6. Sync with Google Sheets
+
+Navigate to **Sync** to view the last sync timestamps and trigger manual operations.
+
+## Google Sheets Synchronization
+
+### Setup
+
+1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
+2. Enable the **Google Sheets API**.
+3. Create a **Service Account** and download the JSON key file.
+4. Place the key file somewhere secure on your machine (not in the repo).
+5. Share your target Google Sheet with the Service Account email (grant Editor access).
+6. Set the following in your `.env` file:
+
+```env
+GOOGLE_SERVICE_ACCOUNT_JSON=/absolute/path/to/service-account-key.json
+GOOGLE_SHEET_ID=your-spreadsheet-id-from-the-url
+```
+
+### How It Works
+
+- **Push (Local to Cloud)** -- When a Person, Training Session, or Debate is created, updated, or deleted locally, an Eloquent Observer dispatches a queued `SyncPushJob` that writes the change to the corresponding Google Sheet tab.
+- **Pull (Cloud to Local)** -- Triggered manually from the Sync page. A `SyncPullJob` reads all rows from Google Sheets and upserts them into the local database.
+- **Conflict Resolution** -- Each row carries a `last_modified` timestamp. The `ConflictResolver` compares remote and local timestamps; the newer version always wins.
+
+### Expected Sheet Structure
+
+Each syncable model maps to a sheet tab. The first column is always the UUID (sync identifier) and the last column is the `last_modified` ISO 8601 timestamp. Example for the **Persons** tab:
+
+| uuid | first_name | last_name | contact_info | join_date | last_modified |
+|---|---|---|---|---|---|
+
+## Project Structure
+
+```
+app/
+├── Contracts/          # Syncable interface
+├── Enums/              # SessionRole, AttendanceStatus, DebateType, etc.
+├── Http/
+│   ├── Controllers/    # Person, TrainingSession, Attendance, Debate, Sync, Dashboard
+│   └── Requests/       # Form request validation classes
+├── Jobs/               # SyncPushJob, SyncPullJob (queued)
+├── Models/             # Person, Role, TrainingSession, Debate, User
+├── Observers/          # SyncObserver (dispatches push jobs on model events)
+├── Policies/           # PersonPolicy, TrainingSessionPolicy, DebatePolicy
+├── Providers/          # AppServiceProvider, GoogleSheetsServiceProvider
+├── Services/
+│   └── GoogleSheets/   # GoogleSheetsClient, SyncPushService, SyncPullService, ConflictResolver
+└── Traits/             # HasGoogleSheetSync (UUID generation, sync timestamps)
+
+database/
+├── migrations/         # Schema for persons, roles, pivots, sessions, debates
+└── seeders/            # RoleSeeder (Admin, Trainer, Member, Beneficiary)
+
+resources/views/
+├── dashboard.blade.php
+├── persons/            # index, create, edit, show
+├── training-sessions/  # index, create, edit, show, attendance
+├── debates/            # index, create, edit, show
+└── sync/               # index (sync dashboard)
+```
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the [Apache 2.0 License](LICENSE).
