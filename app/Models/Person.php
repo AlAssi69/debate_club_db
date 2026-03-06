@@ -15,6 +15,8 @@ class Person extends Model implements Syncable
 {
     use HasFactory, HasGoogleSheetSync;
 
+    protected $table = 'persons';
+
     protected $fillable = [
         'uuid',
         'first_name',
