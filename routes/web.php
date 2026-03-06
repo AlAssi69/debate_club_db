@@ -3,6 +3,7 @@
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DebateController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PersonController;
 use App\Http\Controllers\SyncController;
 use App\Http\Controllers\TrainingSessionController;
@@ -10,6 +11,10 @@ use App\Livewire\DebateIndex;
 use App\Livewire\PersonIndex;
 use App\Livewire\TrainingSessionIndex;
 use Illuminate\Support\Facades\Route;
+
+Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
+    ->name('locale.switch')
+    ->where('locale', 'en|ar');
 
 Route::view('/', 'welcome');
 

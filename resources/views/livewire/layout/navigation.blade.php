@@ -98,6 +98,16 @@ new class extends Component
                 </button>
             </div>
 
+            <!-- Language Toggle -->
+            <div class="hidden sm:flex sm:items-center sm:ms-4">
+                <a href="{{ route('locale.switch', app()->getLocale() === 'en' ? 'ar' : 'en') }}"
+                    class="inline-flex items-center justify-center p-2 rounded-md text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition duration-150 ease-in-out"
+                    aria-label="{{ app()->getLocale() === 'en' ? __('Switch to Arabic') : __('Switch to English') }}"
+                    title="{{ app()->getLocale() === 'en' ? __('Switch to Arabic') : __('Switch to English') }}">
+                    {{ app()->getLocale() === 'en' ? 'ع' : 'EN' }}
+                </a>
+            </div>
+
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
@@ -158,6 +168,14 @@ new class extends Component
             <x-responsive-nav-link :href="route('sync.index')" :active="request()->routeIs('sync.*')" wire:navigate>
                 {{ __('Sync') }}
             </x-responsive-nav-link>
+
+            <div class="pt-2">
+                <a href="{{ route('locale.switch', app()->getLocale() === 'en' ? 'ar' : 'en') }}"
+                    class="block px-4 py-2 text-base font-medium text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-md"
+                    aria-label="{{ app()->getLocale() === 'en' ? __('Switch to Arabic') : __('Switch to English') }}">
+                    {{ app()->getLocale() === 'en' ? __('Switch to Arabic') : __('Switch to English') }}
+                </a>
+            </div>
         </div>
 
         <!-- Responsive Settings Options -->
