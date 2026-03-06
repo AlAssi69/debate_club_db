@@ -1,8 +1,8 @@
-# Debate Club Management System
+# 🎙️ Debate Club Management System
 
 A local web application for managing debate club members, training sessions, attendance, and competition records. Features bi-directional synchronization with Google Sheets to maintain data parity between local storage and cloud records.
 
-## Table of Contents
+## 📑 Table of Contents
 
 - [Overview](#overview)
 - [Architecture](#architecture)
@@ -15,19 +15,19 @@ A local web application for managing debate club members, training sessions, att
 - [Project Structure](#project-structure)
 - [License](#license)
 
-## Overview
+## 🔍 Overview
 
 The system tracks the full lifecycle of a debate club: registering members with flexible role assignments, scheduling training sessions, recording attendance, and logging debate competitions with participant roles. A single person can hold multiple roles simultaneously (e.g., Admin + Trainer), and every entity can be synchronized to Google Sheets for cloud-based access and backup.
 
-### Core Features
+### ✨ Core Features
 
-- **Person & Role Management** -- Central registry with dynamic, overlapping roles (Admin, Trainer, Member, Beneficiary).
-- **Training Session Management** -- Schedule sessions with assigned trainers and trainees, categorized by topic.
-- **Attendance Tracking** -- Bulk present/absent marking per session for all participants.
-- **Debate & Competition Tracking** -- Log friendly, internal, and international debates with per-event participant roles (Debater, Judge, Moderator).
-- **Google Sheets Bi-Directional Sync** -- Push local changes to Google Sheets on save; pull cloud updates into the local database on demand, with timestamp-based conflict resolution.
+- 👥 **Person & Role Management** -- Central registry with dynamic, overlapping roles (Admin, Trainer, Member, Beneficiary).
+- 📚 **Training Session Management** -- Schedule sessions with assigned trainers and trainees, categorized by topic.
+- ✅ **Attendance Tracking** -- Bulk present/absent marking per session for all participants.
+- 🏆 **Debate & Competition Tracking** -- Log friendly, internal, and international debates with per-event participant roles (Debater, Judge, Moderator).
+- 🔄 **Google Sheets Bi-Directional Sync** -- Push local changes to Google Sheets on save; pull cloud updates into the local database on demand, with timestamp-based conflict resolution.
 
-## Architecture
+## 🏗️ Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
@@ -57,13 +57,13 @@ The system tracks the full lifecycle of a debate club: registering members with 
 └──────────────────────┘
 ```
 
-### Design Principles
+### 🧱 Design Principles
 
-- **SOLID** -- Syncable contract (Interface Segregation), service classes (Single Responsibility), dependency injection via Service Provider (Dependency Inversion).
-- **DRY** -- Shared `HasGoogleSheetSync` trait across all syncable models; backed enums for type-safe constants; reusable form request classes.
-- **Data Integrity** -- All destructive and multi-step operations wrapped in `DB::transaction()`. Cascading deletes on pivot tables. `Model::preventLazyLoading()` enforced in development.
+- 🔷 **SOLID** -- Syncable contract (Interface Segregation), service classes (Single Responsibility), dependency injection via Service Provider (Dependency Inversion).
+- ♻️ **DRY** -- Shared `HasGoogleSheetSync` trait across all syncable models; backed enums for type-safe constants; reusable form request classes.
+- 🛡️ **Data Integrity** -- All destructive and multi-step operations wrapped in `DB::transaction()`. Cascading deletes on pivot tables. `Model::preventLazyLoading()` enforced in development.
 
-## Technology Stack
+## 🛠️ Technology Stack
 
 | Layer | Technology | Version |
 |---|---|---|
@@ -78,14 +78,14 @@ The system tracks the full lifecycle of a debate club: registering members with 
 | Cloud Sync | Google Sheets API | v4 |
 | API Client | google/apiclient | 2.x |
 
-## Prerequisites
+## 📋 Prerequisites
 
-- **PHP 8.2+** with extensions: `sqlite3`, `pdo_sqlite`, `mbstring`, `openssl`, `curl`
-- **Composer** (2.x)
-- **Node.js** (18+) and **npm**
-- (Optional) A Google Cloud project with the Sheets API enabled and a Service Account key file for synchronization
+- 🐘 **PHP 8.2+** with extensions: `sqlite3`, `pdo_sqlite`, `mbstring`, `openssl`, `curl`
+- 📦 **Composer** (2.x)
+- 💚 **Node.js** (18+) and **npm**
+- ☁️ (Optional) A Google Cloud project with the Sheets API enabled and a Service Account key file for synchronization
 
-## Installation
+## 📥 Installation
 
 ```bash
 # 1. Clone the repository
@@ -114,9 +114,9 @@ php artisan db:seed
 npm run build
 ```
 
-## Running the Application
+## 🚀 Running the Application
 
-### Quick Start (all services)
+### ⚡ Quick Start (all services)
 
 ```bash
 composer dev
@@ -124,7 +124,7 @@ composer dev
 
 This starts the web server, queue worker, log watcher, and Vite dev server concurrently.
 
-### Manual Start
+### 🔧 Manual Start
 
 ```bash
 # Terminal 1 -- Web server
@@ -139,17 +139,17 @@ npm run dev
 
 The application will be available at **http://localhost:8000**.
 
-## Usage Guide
+## 📖 Usage Guide
 
-### 1. Register & Log In
+### 1. 🔐 Register & Log In
 
 Navigate to `http://localhost:8000/register` to create your account. After registration you are redirected to the dashboard.
 
-### 2. Dashboard
+### 2. 📊 Dashboard
 
 The dashboard displays summary statistics (total persons, training sessions, debates) along with upcoming sessions and recent debates.
 
-### 3. Managing Persons
+### 3. 👥 Managing Persons
 
 Navigate to **Persons** in the top navigation.
 
@@ -157,27 +157,27 @@ Navigate to **Persons** in the top navigation.
 - **Edit / Delete** -- Use the action links in the persons table.
 - **View Details** -- Click a person's name to see their roles, training sessions, and debate participation history.
 
-### 4. Training Sessions
+### 4. 📚 Training Sessions
 
 Navigate to **Training Sessions**.
 
 - **Create Session** -- Set title, category, date, time, and duration. Assign trainers and trainees from the persons list.
 - **Take Attendance** -- From a session's detail page, click "Take Attendance" to bulk-mark each participant as Present or Absent.
 
-### 5. Debates
+### 5. 🏆 Debates
 
 Navigate to **Debates**.
 
 - **Create Debate** -- Set title, type (Friendly / International / Internal), date, location, and outcome. Add participants with their event-specific role (Debater, Judge, Moderator) using the dynamic form rows.
 - **View Details** -- See all participants grouped by their role in the debate.
 
-### 6. Sync with Google Sheets
+### 6. 🔄 Sync with Google Sheets
 
 Navigate to **Sync** to view the last sync timestamps and trigger manual operations.
 
-## Google Sheets Synchronization
+## ☁️ Google Sheets Synchronization
 
-### Setup
+### 🔑 Setup
 
 1. Create a project in [Google Cloud Console](https://console.cloud.google.com/).
 2. Enable the **Google Sheets API**.
@@ -191,20 +191,20 @@ GOOGLE_SERVICE_ACCOUNT_JSON=/absolute/path/to/service-account-key.json
 GOOGLE_SHEET_ID=your-spreadsheet-id-from-the-url
 ```
 
-### How It Works
+### ⚙️ How It Works
 
-- **Push (Local to Cloud)** -- When a Person, Training Session, or Debate is created, updated, or deleted locally, an Eloquent Observer dispatches a queued `SyncPushJob` that writes the change to the corresponding Google Sheet tab.
-- **Pull (Cloud to Local)** -- Triggered manually from the Sync page. A `SyncPullJob` reads all rows from Google Sheets and upserts them into the local database.
-- **Conflict Resolution** -- Each row carries a `last_modified` timestamp. The `ConflictResolver` compares remote and local timestamps; the newer version always wins.
+- ⬆️ **Push (Local to Cloud)** -- When a Person, Training Session, or Debate is created, updated, or deleted locally, an Eloquent Observer dispatches a queued `SyncPushJob` that writes the change to the corresponding Google Sheet tab.
+- ⬇️ **Pull (Cloud to Local)** -- Triggered manually from the Sync page. A `SyncPullJob` reads all rows from Google Sheets and upserts them into the local database.
+- ⚖️ **Conflict Resolution** -- Each row carries a `last_modified` timestamp. The `ConflictResolver` compares remote and local timestamps; the newer version always wins.
 
-### Expected Sheet Structure
+### 📄 Expected Sheet Structure
 
 Each syncable model maps to a sheet tab. The first column is always the UUID (sync identifier) and the last column is the `last_modified` ISO 8601 timestamp. Example for the **Persons** tab:
 
 | uuid | first_name | last_name | contact_info | join_date | last_modified |
 |---|---|---|---|---|---|
 
-## Project Structure
+## 🗂️ Project Structure
 
 ```
 app/
@@ -234,6 +234,6 @@ resources/views/
 └── sync/               # index (sync dashboard)
 ```
 
-## License
+## 📄 License
 
 This project is licensed under the [Apache 2.0 License](LICENSE).
