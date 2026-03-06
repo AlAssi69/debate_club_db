@@ -1,10 +1,10 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex justify-between items-center">
-            <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Edit Training Session') }}
             </h2>
-            <a href="{{ route('training-sessions.index') }}" class="text-sm text-gray-600 hover:text-gray-900">
+            <a href="{{ route('training-sessions.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
                 {{ __('Back') }}
             </a>
         </div>
@@ -13,12 +13,12 @@
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
             @if (session('success'))
-                <div class="mb-4 rounded-md bg-green-50 p-4">
-                    <p class="text-sm text-green-700">{{ session('success') }}</p>
+                <div class="mb-4 rounded-md bg-green-50 dark:bg-green-900/50 p-4">
+                    <p class="text-sm text-green-700 dark:text-green-300">{{ session('success') }}</p>
                 </div>
             @endif
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6">
                     <form action="{{ route('training-sessions.update', $session) }}" method="POST">
                         @csrf
@@ -67,15 +67,15 @@
                         <!-- Trainers -->
                         <div class="mt-4">
                             <x-input-label :value="__('Trainers')" />
-                            <div class="mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-3">
+                            <div class="mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md p-3">
                                 @forelse ($persons as $person)
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="trainer_ids[]" value="{{ $person->id }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                        <input type="checkbox" name="trainer_ids[]" value="{{ $person->id }}" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500"
                                             {{ in_array($person->id, $trainerIds) ? 'checked' : '' }}>
-                                        <span class="ml-2 text-sm text-gray-700">{{ $person->full_name }}</span>
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $person->full_name }}</span>
                                     </label>
                                 @empty
-                                    <p class="text-sm text-gray-500">{{ __('No persons available.') }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No persons available.') }}</p>
                                 @endforelse
                             </div>
                             <x-input-error :messages="$errors->get('trainer_ids')" class="mt-2" />
@@ -84,22 +84,22 @@
                         <!-- Trainees -->
                         <div class="mt-4">
                             <x-input-label :value="__('Trainees')" />
-                            <div class="mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-200 rounded-md p-3">
+                            <div class="mt-2 space-y-2 max-h-40 overflow-y-auto border border-gray-200 dark:border-gray-600 rounded-md p-3">
                                 @forelse ($persons as $person)
                                     <label class="flex items-center">
-                                        <input type="checkbox" name="trainee_ids[]" value="{{ $person->id }}" class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                        <input type="checkbox" name="trainee_ids[]" value="{{ $person->id }}" class="rounded border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500"
                                             {{ in_array($person->id, $traineeIds) ? 'checked' : '' }}>
-                                        <span class="ml-2 text-sm text-gray-700">{{ $person->full_name }}</span>
+                                        <span class="ml-2 text-sm text-gray-700 dark:text-gray-300">{{ $person->full_name }}</span>
                                     </label>
                                 @empty
-                                    <p class="text-sm text-gray-500">{{ __('No persons available.') }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('No persons available.') }}</p>
                                 @endforelse
                             </div>
                             <x-input-error :messages="$errors->get('trainee_ids')" class="mt-2" />
                         </div>
 
                         <div class="flex items-center justify-end mt-6 gap-3">
-                            <a href="{{ route('training-sessions.index') }}" class="text-sm text-gray-600 hover:text-gray-900">
+                            <a href="{{ route('training-sessions.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100">
                                 {{ __('Cancel') }}
                             </a>
                             <x-primary-button>
